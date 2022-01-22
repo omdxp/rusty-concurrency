@@ -1,26 +1,24 @@
-use std::sync::mpsc;
+use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
-
-const NUM_TIMERS: usize = 24; // number of timers
-
-fn timer(d: usize, tx: mpsc::Sender<usize>) {
-    thread::spawn(move || {
-        println!("Timer {} started", d);
-        thread::sleep(Duration::from_secs(d as u64));
-        println!("Timer {} ended", d);
-        tx.send(d).unwrap();
-    });
-}
 
 fn main() {
-    let (tx, rx) = mpsc::channel();
+    let c = Arc::new(Mutex::new(0));
+    let mut hs = vec![];
 
-    for i in 0..NUM_TIMERS {
-        timer(i, tx.clone());
+    for _ in 0..10 {
+        let c1 = Arc::clone(&c);
+        let handle = thread::spawn(move || {
+            let mut v = c1.lock().unwrap();
+
+            *v += 1;
+        });
+
+        hs.push(handle);
     }
 
-    for v in rx.iter().take(NUM_TIMERS) {
-        println!("{} received!", v);
+    for h in hs {
+        h.join().unwrap();
     }
+
+    println!("Result: {}", *c.lock().unwrap());
 }
