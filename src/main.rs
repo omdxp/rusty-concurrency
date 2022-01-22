@@ -1,13 +1,12 @@
+use std::sync::mpsc;
 use std::thread;
 
 fn main() {
-    let v = vec![1, 2, 3];
+    let (tx, rx) = mpsc::channel();
 
-    let handle = thread::spawn(move || {
-        println!("vector: {:?}", v);
+    thread::spawn(move || {
+        tx.send(42).unwrap();
     });
 
-    // println!("{:?}", v);
-
-    handle.join().unwrap();
+    println!("got {}", rx.recv().unwrap())
 }
