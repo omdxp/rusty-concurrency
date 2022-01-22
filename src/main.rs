@@ -9,7 +9,7 @@ fn main() {
         }))
     }
 
-    for j in 0..10 {
-        println!("main thread number {}", j);
+    for j in c {
+        j.join();
     }
 }
