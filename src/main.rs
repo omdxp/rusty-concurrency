@@ -1,15 +1,13 @@
 use std::thread;
 
 fn main() {
-    let mut c = vec![];
+    let v = vec![1, 2, 3];
 
-    for i in 0..10 {
-        c.push(thread::spawn(move || {
-            println!("thread number {}", i);
-        }))
-    }
+    let handle = thread::spawn(move || {
+        println!("vector: {:?}", v);
+    });
 
-    for j in c {
-        j.join();
-    }
+    // println!("{:?}", v);
+
+    handle.join().unwrap();
 }
