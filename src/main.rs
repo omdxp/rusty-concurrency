@@ -1,12 +1,26 @@
 use std::sync::mpsc;
 use std::thread;
+use std::time::Duration;
+
+const NUM_TIMERS: usize = 24; // number of timers
+
+fn timer(d: usize, tx: mpsc::Sender<usize>) {
+    thread::spawn(move || {
+        println!("Timer {} started", d);
+        thread::sleep(Duration::from_secs(d as u64));
+        println!("Timer {} ended", d);
+        tx.send(d).unwrap();
+    });
+}
 
 fn main() {
     let (tx, rx) = mpsc::channel();
 
-    thread::spawn(move || {
-        tx.send(42).unwrap();
-    });
+    for i in 0..NUM_TIMERS {
+        timer(i, tx.clone());
+    }
 
-    println!("got {}", rx.recv().unwrap())
+    for v in rx.iter().take(NUM_TIMERS) {
+        println!("{} received!", v);
+    }
 }
